@@ -2,16 +2,17 @@
     "cameras": [
         {
             "enabled": false,
+            "name": "Camera 1",
             "source_type": "local",
             "url": "",
             "device": 0
         },
         {
             "enabled": false,
+            "name": "Camera 2",
             "source_type": "rtsp",
             "url": "",
-            "device": 0,
-            "name": "Camera 2"
+            "device": 0
         },
         {
             "enabled": false,
@@ -327,9 +328,9 @@
             "name": "Camera 47"
         },
         {
-            "enabled": true,
-            "name": "bhasker",
-            "source_type": "local",
+            "enabled": false,
+            "name": "1",
+            "source_type": "rtsp",
             "url": "",
             "device": 0
         }

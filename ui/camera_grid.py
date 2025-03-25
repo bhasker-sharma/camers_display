@@ -40,6 +40,10 @@ class CameraGridWindow(QMainWindow):
         # Currently focused camera (for single view mode)
         self.focused_camera = 0
         
+        # Define grid dimensions explicitly
+        self.GRID_ROWS = 4
+        self.GRID_COLS = 6
+                
         # Initialize UI
         self.init_ui()
         
@@ -84,10 +88,10 @@ class CameraGridWindow(QMainWindow):
         
         # Create camera views for grid
         self.camera_views = []
-        for i in range(24):
-            view = CameraView(i, self.camera_manager)
-            view.clicked.connect(self.on_camera_clicked)
-            self.camera_views.append(view)
+        # for i in range(24):
+        #     view = CameraView(i, self.camera_manager)
+        #     view.clicked.connect(self.on_camera_clicked)
+        #     self.camera_views.append(view)
             
         # Initial update of camera display
         self.update_camera_display()
@@ -191,22 +195,42 @@ class CameraGridWindow(QMainWindow):
                 
         if self.mode == 0:  # Grid view
             # Fixed grid dimensions - 6 columns, 4 rows
-            rows, cols = 4, 6
-            
-            # Add views to layout
-            for i in range(24):
-                row = i // cols
-                col = i % cols
+            rows, cols = self.GRID_ROWS, self.GRID_COLS
+            total_cameras_per_screen = rows * cols
+            start_camera_index =self.current_screen * total_cameras_per_screen
+
+            # Ensure we have enough camera views
+            while len(self.camera_views) < total_cameras_per_screen:
+                view = CameraView(len(self.camera_views), self.camera_manager)
+                view.clicked.connect(self.on_camera_clicked)
+                self.camera_views.append(view)
+
+            #add views to layout
+            for grid_position in range(total_cameras_per_screen):
+                row = grid_position // self.GRID_COLS
+                cols = grid_position % self.GRID_COLS
                 
                 # Calculate actual camera index
-                camera_index = i + self.current_screen * 24
+                camera_index = start_camera_index + grid_position
                 
-                # Update camera index
-                self.camera_views[i].set_camera_index(camera_index)
+                if camera_index < 48:
+                    # Update camera index
+                    self.camera_views[grid_position].set_camera_index(camera_index)
                 
-                # Add to layout with stretch factors to maintain uniform size
-                self.camera_layout.addWidget(self.camera_views[i], row, col)
-                
+                    # Add to layout with stretch factors to maintain uniform size
+                    self.camera_layout.addWidget(self.camera_views[grid_position], row, cols)
+
+                else:
+                    # Create a blank placeholder if no camera exists
+                    placeholder = QLabel("No Camera")
+                    placeholder.setAlignment(Qt.AlignCenter)
+                    placeholder.setStyleSheet("""
+                        background-color: #333;
+                        color: #888;
+                        border: 1px solid #555;
+                    """)
+                    self.camera_layout.addWidget(placeholder, row, cols)
+
             # Set stretch factors to ensure uniform cell sizes
             for i in range(rows):
                 self.camera_layout.setRowStretch(i, 1)
@@ -248,8 +272,8 @@ class CameraGridWindow(QMainWindow):
     def on_prev_clicked(self):
         """Handle click of previous button"""
         # Ensure we're on the first screen (showing cameras 1-24)
-        self.current_screen = 0
-        
+        #self.current_screen = 0
+        self.current_screen = (self.current_screen -1+2) % 2
         # Update UI
         self.create_navbar()
         self.update_camera_display()
@@ -257,7 +281,7 @@ class CameraGridWindow(QMainWindow):
     def on_next_clicked(self):
         """Handle click of next button"""
         # Ensure we're on the second screen (showing cameras 25-48)
-        self.current_screen = 1
+        self.current_screen = (self.current_screen +1) % 2
         
         # Update UI
         self.create_navbar()
